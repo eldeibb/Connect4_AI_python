@@ -38,3 +38,32 @@ def getNextValidRow(board, col):
             return row
 def print_board(board):
     print(np.flip(board, 0))
+
+def winning_move(board, token):
+    # Check horizontal locations for win
+    for col in range(COLUMNS - 3):
+        for row in range(ROWS):
+            if board[row][col] == token and board[row][col + 1] == token and board[row][col + 2] == token and board[row][
+                col + 3] == token:
+                return True
+
+    # Check vertical locations for win
+    for col in range(COLUMNS):
+        for row in range(ROWS - 3):
+            if board[row][col] == token and board[row + 1][col] == token and board[row + 2][col] == token and board[row + 3][
+                col] == token:
+                return True
+
+    # Check positively sloped diaganols
+    for col in range(COLUMNS - 3):
+        for row in range(ROWS - 3):
+            if board[row][col] == token and board[row + 1][col + 1] == token and board[row + 2][col + 2] == token and board[row + 3][
+                col + 3] == token:
+                return True
+
+    # Check negatively sloped diaganols
+    for col in range(COLUMNS - 3):
+        for row in range(3, ROWS):
+            if board[row][col] == token and board[row - 1][col + 1] == token and board[row - 2][col + 2] == token and board[row - 3][
+                col + 3] == token:
+                return True
