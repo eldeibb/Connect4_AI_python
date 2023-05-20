@@ -20,6 +20,30 @@ PLAYER1_PIECE = 1
 PLAYER2_PIECE = 2
 
 WINDOW_LENGTH = 4
+root = Tk()
+root.title("Connect Four - Difficulty Level")
+
+difficulty = StringVar(root)
+
+def set_difficulty(selected):
+    difficulty.set(selected)
+    root.destroy()
+
+label = Label(root, text="Choose the difficulty level:")
+label.pack()
+
+button1 = Button(root, text="Easy", command=lambda: set_difficulty("Easy"))
+button1.pack()
+
+button2 = Button(root, text="Medium", command=lambda: set_difficulty("Medium"))
+button2.pack()
+
+button3 = Button(root, text="Hard", command=lambda: set_difficulty("Hard"))
+button3.pack()
+
+root.mainloop()
+
+selected_difficulty = difficulty.get()
 
 
 def create_board():
@@ -39,6 +63,15 @@ def getNextValidRow(board, col):
 def print_board(board):
     print(np.flip(board, 0))
 
+    
+def selectDepth(selected_difficulty):
+    if (selected_difficulty == "Easy"):
+        return 3
+    elif (selected_difficulty == "Medium"):
+        return 5
+    elif (selected_difficulty == "Hard"):
+        return 7
+    
 def winning_move(board, token):
     # Check horizontal locations for win
     for col in range(COLUMNS - 3):
