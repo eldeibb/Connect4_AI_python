@@ -148,3 +148,156 @@ def pick_best_move(board, token):
             best_col = col
 
     return best_col
+
+def minimax(board, depth, alpha, beta, maximizingPlayer):
+    valid_locations = getValidLocations(board)
+    is_terminal = is_terminal_node(board)
+
+    if depth == 0 or is_terminal:
+        if is_terminal:
+            if winning_move(board, PLAYER2_PIECE):
+                return (None, 100000000000000)
+            elif winning_move(board, PLAYER1_PIECE):
+                return (None, -10000000000000)
+            else:  # Game is over, no more valid moves
+                return (None, 0)
+        else:  # Depth is zero
+            return (None, score_position(board, PLAYER2_PIECE))
+
+
+    if maximizingPlayer:
+        value = -math.inf
+        column = random.choice(valid_locations)
+        for col in valid_locations:
+            row = getNextValidRow(board, col)
+            b_copy = board.copy()
+            dropToken(b_copy, row, col, PLAYER2_PIECE)
+            new_score = minimax(b_copy, depth - 1, alpha, beta, False)[1]
+            if new_score > value:
+                value = new_score
+                column = col
+            alpha = max(alpha, value)
+            if alpha >= beta:
+                break
+        return column, value
+
+
+    else:  # Minimizing player
+        value = math.inf
+        column = random.choice(valid_locations)
+        for col in valid_locations:
+            row = getNextValidRow(board, col)
+            b_copy = board.copy()
+            dropToken(b_copy, row, col, PLAYER1_PIECE)
+            new_score = minimax(b_copy, depth - 1, alpha, beta, True)[1]
+            if new_score < value:
+                value = new_score
+                column = col
+            beta = min(beta, value)
+            if alpha >= beta:
+                break
+        return column, value
+
+def draw_board(board):
+    for col in range(COLUMNS):
+        for row in range(ROWS):
+            pygame.draw.rect(screen, BLUE, (col * SQUARESIZE, row * SQUARESIZE + SQUARESIZE, SQUARESIZE, SQUARESIZE))
+            pygame.draw.circle(screen, BLACK, (
+            int(col * SQUARESIZE + SQUARESIZE / 2), int(row * SQUARESIZE + SQUARESIZE + SQUARESIZE / 2)), RADIUS)
+
+    for col in range(COLUMNS):
+        for row in range(ROWS):
+            if board[row][col] == PLAYER1_PIECE:
+                pygame.draw.circle(screen, RED, (
+                int(col * SQUARESIZE + SQUARESIZE / 2), height - int(row * SQUARESIZE + SQUARESIZE / 2)), RADIUS)
+            elif board[row][col] == PLAYER2_PIECE:
+                pygame.draw.circle(screen, YELLOW, (
+                int(col * SQUARESIZE + SQUARESIZE / 2), height - int(row * SQUARESIZE + SQUARESIZE / 2)), RADIUS)
+    pygame.display.update()
+
+board = create_board()
+print_board(board)
+game_over = False
+
+pygame.init()
+
+SQUARESIZE = 100
+
+width = COLUMNS * SQUARESIZE
+height = (ROWS + 1) * SQUARESIZE
+
+size = (width, height)
+
+RADIUS = int(SQUARESIZE / 2 - 5)
+
+screen = pygame.display.set_mode(size)
+draw_board(board)
+pygame.display.update()
+
+myfont = pygame.font.SysFont("monospace", 75)
+
+turn = random.randint(PLAYER1, PLAYER2)
+
+while not game_over:
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+
+        if event.type == pygame.MOUSEMOTION:
+            pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+            posx = event.pos[0]
+            if turn == PLAYER1:
+                pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE / 2)), RADIUS)
+
+        pygame.display.update()
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+            # print(event.pos)
+            # Ask for Player 1 Input
+            if turn == PLAYER1:
+                #depth = selectDepth(selected_difficulty)
+                col, minimax_score = minimax(board, 2, -math.inf, math.inf, True)
+
+                if is_valid(board, col):
+                    # pygame.time.wait(500)
+                    row = getNextValidRow(board, col)
+                    dropToken(board, row, col, PLAYER1_PIECE)
+
+                    if winning_move(board, PLAYER1_PIECE):
+                        label = myfont.render("Player 1 wins!!", True, RED)
+                        screen.blit(label, (40, 10))
+                        game_over = True
+
+                    print_board(board)
+                    draw_board(board)
+
+                    turn += 1
+                    turn = turn % 2
+    # # Ask for Player 2 Input
+    if turn == PLAYER2 and not game_over:
+
+        # col = random.randint(0, COLUMN_COUNT-1)
+        # col = pick_best_move(board, AI_PIECE)
+        depth = selectDepth(selected_difficulty)
+        col, minimax_score = minimax(board, depth, -math.inf, math.inf, True)
+
+        if is_valid(board, col):
+            # pygame.time.wait(500)
+            row = getNextValidRow(board, col)
+            dropToken(board, row, col, PLAYER2_PIECE)
+
+            if winning_move(board, PLAYER2_PIECE):
+                label = myfont.render("Player 2 wins!!",True, YELLOW)
+                screen.blit(label, (40, 10))
+                game_over = True
+
+            print_board(board)
+            draw_board(board)
+
+            turn += 1
+            turn = turn % 2
+
+    if game_over:
+        pygame.time.wait(3000)
