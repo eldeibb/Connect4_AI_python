@@ -118,3 +118,33 @@ def score_position(board, token):
             score += evaluate_window(window, token)
 
     return score
+
+def is_terminal_node(board):
+    return winning_move(board, PLAYER1_PIECE) or winning_move(board, PLAYER2_PIECE) or len(getValidLocations(board)) == 0
+
+
+def getValidLocations(board):
+    validLocations = []
+    for col in range(COLUMNS):
+        if is_valid(board, col):
+            validLocations.append(col)
+    return validLocations
+
+def pick_random_move(board):
+    valid_locations = getValidLocations(board)
+    return random.choice(valid_locations)
+
+def pick_best_move(board, token):
+    validLocations = getValidLocations(board)
+    best_score = -10000
+    best_col = random.choice(validLocations)
+    for col in validLocations:
+        row = getNextValidRow(board, col)
+        temp_board = board.copy()
+        dropToken(temp_board, row, col, token)
+        score = score_position(temp_board, token)
+        if score > best_score:
+            best_score = score
+            best_col = col
+
+    return best_col
