@@ -67,55 +67,54 @@ def winning_move(board, token):
             if board[row][col] == token and board[row - 1][col + 1] == token and board[row - 2][col + 2] == token and board[row - 3][
                 col + 3] == token:
                 return True
+def evaluate_window(window, token):
+    score = 0
+    opp_token = PLAYER1_PIECE
+    if token == PLAYER1_PIECE:
+        opp_token = PLAYER2_PIECE
 
-    def evaluate_window(window, token):
-        score = 0
-        opp_token = PLAYER1_PIECE
-        if token == PLAYER1_PIECE:
-            opp_token = PLAYER2_PIECE
+    if window.count(token) == 4:
+        score += 100
+    elif window.count(token) == 3 and window.count(EMPTY) == 1:
+        score += 5
+    elif window.count(token) == 2 and window.count(EMPTY) == 2:
+        score += 2
+    if window.count(opp_token) == 3 and window.count(EMPTY) == 1:
+        score -= 4
 
-        if window.count(token) == 4:
-            score += 100
-        elif window.count(token) == 3 and window.count(EMPTY) == 1:
-            score += 5
-        elif window.count(token) == 2 and window.count(EMPTY) == 2:
-            score += 2
-        if window.count(opp_token) == 3 and window.count(EMPTY) == 1:
-            score -= 4
+    return score
 
-        return score
+def score_position(board, token):
+    score = 0
 
-    def score_position(board, token):
-        score = 0
+    ## Score center column
+    center_array = [int(i) for i in list(board[:, COLUMNS // 2])]
+    center_count = center_array.count(token)
+    score += center_count * 3
 
-        ## Score center column
-        center_array = [int(i) for i in list(board[:, COLUMNS // 2])]
-        center_count = center_array.count(token)
-        score += center_count * 3
+    ## Score Horizontal
+    for row in range(ROWS):
+        row_array = [int(i) for i in list(board[row, :])]
+        for col in range(COLUMNS - 3):
+            window = row_array[col:col + WINDOW_LENGTH]
+            score += evaluate_window(window, token)
 
-        ## Score Horizontal
-        for row in range(ROWS):
-            row_array = [int(i) for i in list(board[row, :])]
-            for col in range(COLUMNS - 3):
-                window = row_array[col:col + WINDOW_LENGTH]
-                score += evaluate_window(window, token)
-
-        ## Score Vertical
-        for col in range(COLUMNS):
-            col_array = [int(i) for i in list(board[:, col])]
-            for row in range(ROWS - 3):
-                window = col_array[row:row + WINDOW_LENGTH]
-                score += evaluate_window(window, token)
-
-        ## Score posiive sloped diagonal
+    ## Score Vertical
+    for col in range(COLUMNS):
+        col_array = [int(i) for i in list(board[:, col])]
         for row in range(ROWS - 3):
-            for col in range(COLUMNS - 3):
-                window = [board[row + i][col + i] for i in range(WINDOW_LENGTH)]
-                score += evaluate_window(window, token)
+            window = col_array[row:row + WINDOW_LENGTH]
+            score += evaluate_window(window, token)
 
-        for row in range(ROWS - 3):
-            for col in range(COLUMNS - 3):
-                window = [board[row + 3 - i][col + i] for i in range(WINDOW_LENGTH)]
-                score += evaluate_window(window, token)
+    ## Score posiive sloped diagonal
+    for row in range(ROWS - 3):
+        for col in range(COLUMNS - 3):
+            window = [board[row + i][col + i] for i in range(WINDOW_LENGTH)]
+            score += evaluate_window(window, token)
 
-        return score
+    for row in range(ROWS - 3):
+        for col in range(COLUMNS - 3):
+            window = [board[row + 3 - i][col + i] for i in range(WINDOW_LENGTH)]
+            score += evaluate_window(window, token)
+
+    return score
