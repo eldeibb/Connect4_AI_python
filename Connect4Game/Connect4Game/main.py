@@ -3,7 +3,8 @@ import random
 import pygame
 import sys
 import math
-from tkinter import Tk, Label, Button, StringVar
+from tkinter import Tk, Label, Button, StringVar, Checkbutton
+
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -24,10 +25,27 @@ root = Tk()
 root.title("Connect Four - Difficulty Level")
 
 difficulty = StringVar(root)
+algorithm = StringVar(root)
 
 def set_difficulty(selected):
     difficulty.set(selected)
     root.destroy()
+
+def set_algorithm(Selected):
+    algorithm.set(Selected)
+    root.destroy()
+
+label_algorithm = Label(root, text="Choose the algorithm:")
+label_algorithm.pack()
+
+algorithm_type = StringVar(root)
+
+checkbox_algorithm1 = Checkbutton(root, text="Minimax", variable=algorithm_type, onvalue="Minimax", offvalue="")
+checkbox_algorithm1.pack()
+
+checkbox_algorithm2 = Checkbutton(root, text="Alpha-beta", variable=algorithm_type, onvalue="Alpha-beta", offvalue="")
+checkbox_algorithm2.pack()
+
 
 label = Label(root, text="Choose the difficulty level:")
 label.pack()
@@ -41,8 +59,8 @@ button2.pack()
 button3 = Button(root, text="Hard", command=lambda: set_difficulty("Hard"))
 button3.pack()
 
-root.mainloop()
 
+root.mainloop()
 selected_difficulty = difficulty.get()
 
 
